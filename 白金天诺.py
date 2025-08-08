@@ -293,7 +293,18 @@ class BaiJinTianNuoApp:
     def create_edit_dialog(self, item, column_name, current_value):
         """创建编辑对话框"""
         edit_window = tk.Toplevel(self.root)
-        edit_window.title(f'编辑 {column_name}')
+        
+        # 定义列名映射
+        column_map = {
+            'name': '名称',
+            'price': '价格',
+            'quantity': '数量',
+            #'rank': '等级',
+            'type': '类型'
+        }
+        display_name = column_map.get(column_name, column_name.capitalize())
+        
+        edit_window.title(f'编辑 {display_name}')
         edit_window.geometry('400x200')
         edit_window.transient(self.root)
         edit_window.grab_set()
@@ -301,7 +312,7 @@ class BaiJinTianNuoApp:
         # 居中显示
         edit_window.geometry("+%d+%d" % (self.root.winfo_rootx() + 200, self.root.winfo_rooty() + 100))
         
-        tk.Label(edit_window, text=f'编辑 {column_name}:', font=(None, 12)).pack(pady=10)
+        tk.Label(edit_window, text=f'编辑 {display_name}:', font=(None, 12)).pack(pady=10)
         
         # 根据列类型创建不同的输入控件
         if column_name == 'type':
@@ -334,16 +345,20 @@ class BaiJinTianNuoApp:
             # 验证输入
             if column_name == 'name':
                 if not self.validate_item_name(new_value):
-                    messagebox.showerror("错误", "无效名称")
+                    messagebox.showerror("错误", "无效的物品名称，请确保名称存在于核心数据文件中。")
                     return
             elif column_name in ['price', 'quantity']:
                 try:
                     value = float(new_value)
-                    if value == 0:
-                        messagebox.showerror("错误", f"{column_name.capitalize()} 不能为0")
+                    if value <= 0:
+                        messagebox.showerror("错误", f"{display_name} 必须是大于0的数字。")
                         return
                 except ValueError:
-                    messagebox.showerror("错误", f"{column_name.capitalize()} 必须是数字")
+                    messagebox.showerror("错误", f"{display_name} 必须是有效的数字。")
+                    return
+            elif column_name == 'rank':
+                if new_value and not new_value.isdigit():
+                    messagebox.showerror("错误", f"{display_name} 必须是整数。")
                     return
             
             # 更新表格
